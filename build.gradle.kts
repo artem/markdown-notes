@@ -48,6 +48,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("org.jetbrains:markdown:0.2.0.pre-55")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
             }
         }
         val commonTest by getting {

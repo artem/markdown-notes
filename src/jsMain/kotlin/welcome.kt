@@ -37,7 +37,6 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
                 id = "note-content"
                 +state.name
             }
-
         }
 
         button {
