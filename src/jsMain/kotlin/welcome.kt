@@ -1,20 +1,19 @@
 import kotlinx.browser.document
-import kotlinx.html.ButtonType
-import kotlinx.html.InputType
 import kotlinx.html.id
-import kotlinx.html.js.onChangeFunction
 import kotlinx.html.js.onClickFunction
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
-import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLTextAreaElement
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
-import react.dom.*
+import react.dom.InnerHTML
+import react.dom.button
+import react.dom.div
+import react.dom.textArea
 
 external interface WelcomeProps : RProps {
     var name: String
@@ -22,7 +21,6 @@ external interface WelcomeProps : RProps {
 
 data class WelcomeState(val name: String, val compiled: String) : RState
 
-@JsExport
 class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(props) {
 
     init {
