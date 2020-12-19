@@ -1,36 +1,36 @@
 import kotlinx.browser.window
 import kotlinx.datetime.Clock
 import kotlinx.html.js.onClickFunction
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
+import react.*
+import react.dom.b
 import react.dom.p
 
-data class NoteListState(val list: List<NoteMeta>) : RState
+external interface MarkdownListProps: RProps {
+    var list: List<NoteMeta>
+}
 
-class MarkdownList : RComponent<RProps, NoteListState>() {
-    init {
-        state = NoteListState(
-            listOf(
-                NoteMeta(1, "first note", Clock.System.now()),
-                NoteMeta(2, "kek", Clock.System.now()),
-                NoteMeta(9, "first note", Clock.System.now()),
-                NoteMeta(10, "Hello w", Clock.System.now()),
-            )
-        )
-    }
+external interface MarkdownListState: RState {
+    var selected: NoteMeta?
+}
 
+class MarkdownList : RComponent<MarkdownListProps, MarkdownListState>() {
     override fun RBuilder.render() {
-        for (note in state.list) {
+        for (note in props.list) {
             p {
                 key = note.id.toString()
                 attrs {
                     onClickFunction = {
-                        window.alert("created on ${note.created}")
+                        setState {
+                            selected = note
+                        }
                     }
                 }
-                +note.name
+
+                if (note == state.selected) {
+                    b { +note.name }
+                } else {
+                    +note.name
+                }
             }
         }
     }
