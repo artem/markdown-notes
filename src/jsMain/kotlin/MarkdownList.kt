@@ -1,3 +1,4 @@
+import kotlinx.browser.window
 import kotlinx.html.js.onClickFunction
 import react.*
 import react.dom.b
@@ -5,26 +6,25 @@ import react.dom.p
 
 external interface MarkdownListProps : RProps {
     var list: List<NoteMeta>
-}
-
-external interface MarkdownListState : RState {
     var selected: NoteMeta?
+    var onSelectNote: (NoteMeta) -> Unit
 }
 
-class MarkdownList : RComponent<MarkdownListProps, MarkdownListState>() {
+class MarkdownList : RComponent<MarkdownListProps, RState>() {
     override fun RBuilder.render() {
         for (note in props.list) {
             p {
                 key = note.id.toString()
                 attrs {
                     onClickFunction = {
-                        setState {
-                            selected = note
-                        }
+                        props.onSelectNote(note)
+                        window.alert(props.selected.toString())
                     }
                 }
-
-                if (note == state.selected) {
+                window.alert("render..." + note.toString() + props.selected?.toString())
+                window.alert("" + note.hashCode() + " " + props.selected?.hashCode())
+                if (note == props.selected) {
+                    window.alert("BOLD!!")
                     b { +note.name }
                 } else {
                     +note.name
