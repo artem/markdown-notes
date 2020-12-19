@@ -1,8 +1,8 @@
-import react.dom.render
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.datetime.Clock
 import react.dom.h3
+import react.dom.render
 
 fun main() {
     window.onload = {
