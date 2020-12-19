@@ -41,7 +41,7 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
 
         button {
             attrs {
-                onClickFunction = { _ ->
+                onClickFunction = {
                     val typed = (document.getElementById("note-content") as HTMLTextAreaElement).value
                     setState(
                         WelcomeState(name = typed, compiled = parseMd(typed))

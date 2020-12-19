@@ -1,4 +1,6 @@
+import kotlinx.browser.window
 import kotlinx.datetime.Clock
+import kotlinx.html.js.onClickFunction
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -7,7 +9,6 @@ import react.dom.p
 
 data class NoteListState(val list: List<NoteMeta>) : RState
 
-@JsExport
 class MarkdownList : RComponent<RProps, NoteListState>() {
     init {
         state = NoteListState(
@@ -23,7 +24,13 @@ class MarkdownList : RComponent<RProps, NoteListState>() {
     override fun RBuilder.render() {
         for (note in state.list) {
             p {
-                +"${note.name}: created on ${note.created}"
+                key = note.id.toString()
+                attrs {
+                    onClickFunction = {
+                        window.alert("created on ${note.created}")
+                    }
+                }
+                +note.name
             }
         }
     }
