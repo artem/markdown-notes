@@ -18,13 +18,9 @@ class MarkdownList : RComponent<MarkdownListProps, RState>() {
                 attrs {
                     onClickFunction = {
                         props.onSelectNote(note)
-                        window.alert(props.selected.toString())
                     }
                 }
-                window.alert("render..." + note.toString() + props.selected?.toString())
-                window.alert("" + note.hashCode() + " " + props.selected?.hashCode())
                 if (note == props.selected) {
-                    window.alert("BOLD!!")
                     b { +note.name }
                 } else {
                     +note.name

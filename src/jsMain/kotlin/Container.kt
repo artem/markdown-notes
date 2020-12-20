@@ -29,9 +29,7 @@ class Container : RComponent<RProps, CompState>() {
                 list = dummy
                 selected = state.currentNote
                 onSelectNote = { note ->
-                    window.alert("Called")
                     setState {
-                        window.alert("called as well")
                         currentNote = note
                     }
                 }
