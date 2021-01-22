@@ -1,7 +1,14 @@
+import io.ktor.client.*
+import io.ktor.client.engine.js.*
+import io.ktor.client.request.*
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.html.id
 import kotlinx.html.js.onClickFunction
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
@@ -18,35 +25,37 @@ import react.dom.textArea
 
 external interface WelcomeProps : RProps {
     var note: Note
+    var onRemoveNote: (NoteMeta) -> Unit
 }
 
-data class WelcomeState(val content: String, val compiled: String) : RState
+data class WelcomeState(val compiled: String) : RState
 
 class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(props) {
     init {
-        state = WelcomeState(props.note.content, parseMd(props.note.content))
+        state = WelcomeState(parseMd(props.note.content))
+    }
+
+    private fun recompileMd() {
+        val typed = (document.getElementById("note-content") as HTMLTextAreaElement).value
+        setState(
+            WelcomeState(compiled = parseMd(typed))
+        )
     }
 
     override fun RBuilder.render() {
         div {
             attrs["dangerouslySetInnerHTML"] = InnerHTML(state.compiled)
-            //+"Hello, ${state.compiled}"
         }
         textArea {
             attrs {
                 id = "note-content"
-                +state.content
+                +props.note.content
             }
         }
 
         button {
             attrs {
-                onClickFunction = {
-                    val typed = (document.getElementById("note-content") as HTMLTextAreaElement).value
-                    setState(
-                        WelcomeState(content = typed, compiled = parseMd(typed))
-                    )
-                }
+                onClickFunction = { recompileMd() }
             }
             +"Preview"
         }
@@ -54,7 +63,17 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
         button {
             attrs {
                 onClickFunction = {
-                    window.alert("TODO")
+                    val typed = (document.getElementById("note-content") as HTMLTextAreaElement).value
+                    val client = HttpClient(Js)
+
+                    val mainScope = MainScope()
+                    mainScope.launch {
+                        client.post<Unit> {
+                            url("${window.location.origin}/api/notes/${props.note.meta.id}")
+                            body = typed
+                        }
+                    }
+                    recompileMd()
                 }
             }
             +"Save"
@@ -63,15 +82,37 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
         button {
             attrs {
                 onClickFunction = {
-                    window.alert("TODO")
+                    val obj = document.getElementById("note-content") as HTMLTextAreaElement
+                    val client = HttpClient(Js)
+
+                    val mainScope = MainScope()
+                    mainScope.launch {
+                        val resp = client.get<String>("${window.location.origin}/api/notes/${props.note.meta.id}")
+                        obj.value = Json.decodeFromString<Note>(resp).content
+                        recompileMd()
+                    }
                 }
             }
             +"Reload"
         }
+
+        button {
+            attrs {
+                onClickFunction = {
+                    val client = HttpClient(Js)
+                    val mainScope = MainScope()
+                    mainScope.launch {
+                        client.delete<Unit>("${window.location.origin}/api/notes/${props.note.meta.id}")
+                        props.onRemoveNote(props.note.meta)
+                    }
+                }
+            }
+            +"Delete"
+        }
     }
 }
 
-fun parseMd(src: String): String {
+private fun parseMd(src: String): String {
     val sanitized = src.replace("<", "&lt;")
     val flavour: MarkdownFlavourDescriptor = CommonMarkFlavourDescriptor()
     val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(sanitized)
