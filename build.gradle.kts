@@ -76,6 +76,7 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains:kotlin-react:17.0.1-pre.141-kotlin-1.4.21")
                 implementation("org.jetbrains:kotlin-react-dom:17.0.1-pre.141-kotlin-1.4.21")
+                implementation("io.ktor:ktor-client-js:1.5.0")
             }
         }
         val jsTest by getting {
