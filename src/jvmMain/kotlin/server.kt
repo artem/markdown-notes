@@ -38,11 +38,7 @@ fun main() {
                     call.respond(dummy)
                 }
                 post {
-                    val name = call.receiveText()
-                    val newNoteMeta = NoteMeta(Random.nextInt(), name)
-                    dummy.add(newNoteMeta)
-                    dummy1[newNoteMeta.id] = Note("Put *your* __text__ `here`", newNoteMeta)
-                    call.respondText("Added successfully!", status = HttpStatusCode.Accepted)
+                    newNote(call)
                 }
                 get("{id}") {
                     getNote(call)
@@ -61,14 +57,20 @@ fun main() {
     }.start(wait = true)
 }
 
-suspend fun deleteNote(call: ApplicationCall) {
+suspend fun newNote(call: ApplicationCall) {
+    val name = call.receiveText()
+    val newNoteMeta = NoteMeta(Random.nextInt(), name)
+    dummy.add(newNoteMeta)
+    dummy1[newNoteMeta.id] = Note("Put *your* __text__ `here`", newNoteMeta)
+    call.respond(HttpStatusCode.Accepted, newNoteMeta)
+}
+
+suspend fun getNote(call: ApplicationCall) {
     try {
         val id = call.parameters["id"]?.toInt()
         val note = dummy1[id]
         if (note != null) {
-            dummy.remove(note.meta)
-            dummy1.remove(id)
-            call.respondText("Deleted successfully!", status = HttpStatusCode.Accepted)
+            call.respond(note)
         } else {
             call.respond(HttpStatusCode.NotFound, "Unknown note!")
         }
@@ -92,12 +94,14 @@ suspend fun setNote(call: ApplicationCall) {
     }
 }
 
-suspend fun getNote(call: ApplicationCall) {
+suspend fun deleteNote(call: ApplicationCall) {
     try {
         val id = call.parameters["id"]?.toInt()
         val note = dummy1[id]
         if (note != null) {
-            call.respond(note)
+            dummy.remove(note.meta)
+            dummy1.remove(id)
+            call.respondText("Deleted successfully!", status = HttpStatusCode.Accepted)
         } else {
             call.respond(HttpStatusCode.NotFound, "Unknown note!")
         }
