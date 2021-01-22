@@ -1,7 +1,8 @@
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
 plugins {
-    kotlin("multiplatform") version "1.4.20"
+    kotlin("multiplatform") version "1.4.21-2"
+    kotlin("plugin.serialization") version "1.4.21-2"
     application
 }
 
@@ -47,8 +48,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains:markdown:0.2.0.pre-55")
+                implementation("org.jetbrains:markdown:0.2.0.pre-61")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
             }
         }
         val commonTest by getting {
@@ -59,8 +61,9 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-server-netty:1.4.0")
-                implementation("io.ktor:ktor-html-builder:1.4.0")
+                implementation("io.ktor:ktor-server-netty:1.5.0")
+                implementation("io.ktor:ktor-html-builder:1.5.0")
+                implementation("io.ktor:ktor-serialization:1.5.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.2")
             }
         }
@@ -71,8 +74,8 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
-                implementation("org.jetbrains:kotlin-react:16.13.1-pre.113-kotlin-1.4.0")
-                implementation("org.jetbrains:kotlin-react-dom:16.13.1-pre.113-kotlin-1.4.0")
+                implementation("org.jetbrains:kotlin-react:17.0.1-pre.141-kotlin-1.4.21")
+                implementation("org.jetbrains:kotlin-react-dom:17.0.1-pre.141-kotlin-1.4.21")
             }
         }
         val jsTest by getting {
