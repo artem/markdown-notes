@@ -1,6 +1,8 @@
-import kotlinx.browser.window
 import kotlinx.html.js.onClickFunction
-import react.*
+import react.RBuilder
+import react.RComponent
+import react.RProps
+import react.RState
 import react.dom.b
 import react.dom.p
 

@@ -1,4 +1,5 @@
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.html.id
 import kotlinx.html.js.onClickFunction
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
@@ -16,15 +17,14 @@ import react.dom.div
 import react.dom.textArea
 
 external interface WelcomeProps : RProps {
-    var name: String
+    var note: Note
 }
 
-data class WelcomeState(val name: String, val compiled: String) : RState
+data class WelcomeState(val content: String, val compiled: String) : RState
 
 class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(props) {
-
     init {
-        state = WelcomeState(props.name, props.name)
+        state = WelcomeState(props.note.content, parseMd(props.note.content))
     }
 
     override fun RBuilder.render() {
@@ -35,7 +35,7 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
         textArea {
             attrs {
                 id = "note-content"
-                +state.name
+                +state.content
             }
         }
 
@@ -44,18 +44,37 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
                 onClickFunction = {
                     val typed = (document.getElementById("note-content") as HTMLTextAreaElement).value
                     setState(
-                        WelcomeState(name = typed, compiled = parseMd(typed))
+                        WelcomeState(content = typed, compiled = parseMd(typed))
                     )
                 }
             }
             +"Preview"
         }
+
+        button {
+            attrs {
+                onClickFunction = {
+                    window.alert("TODO")
+                }
+            }
+            +"Save"
+        }
+
+        button {
+            attrs {
+                onClickFunction = {
+                    window.alert("TODO")
+                }
+            }
+            +"Reload"
+        }
     }
 }
 
 fun parseMd(src: String): String {
+    val sanitized = src.replace("<", "&lt;")
     val flavour: MarkdownFlavourDescriptor = CommonMarkFlavourDescriptor()
-    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(src)
-    val html = HtmlGenerator(src, parsedTree, flavour).generateHtml()
+    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(sanitized)
+    val html = HtmlGenerator(sanitized, parsedTree, flavour).generateHtml()
     return html.substring("<body>".length, html.length - "</body>".length)
 }

@@ -6,26 +6,12 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.html.*
-import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
-import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
-import org.intellij.markdown.html.HtmlGenerator
-import org.intellij.markdown.parser.MarkdownParser
 
 fun HTML.index() {
     head {
         title("Hello from Ktor!")
     }
     body {
-        div {
-            unsafe {
-                val src = "Some *Markdown*"
-                val flavour: MarkdownFlavourDescriptor = CommonMarkFlavourDescriptor()
-                val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(src)
-                val html = HtmlGenerator(src, parsedTree, flavour).generateHtml()
-                val htmlWithoutBody = html.substring("<body>".length, html.length - "</body>".length)
-                raw(htmlWithoutBody)
-            }
-        }
         div {
             id = "root"
         }
