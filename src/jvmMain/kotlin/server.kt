@@ -10,7 +10,6 @@ import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.html.*
-import kotlin.random.Random
 
 fun HTML.index() {
     head {
@@ -50,6 +49,38 @@ fun main() {
                     deleteNote(call)
                 }
             }
+            route("/notes/") {
+                get {
+                    call.respondHtml {
+                        body {
+                            for (note in dummy) {
+                                a {
+                                    href = "/notes/${note.id}"
+                                    +note.id
+                                }
+                                br
+                            }
+                        }
+                    }
+                }
+                get("{id}") {
+                    val note = dummy1[call.parameters["id"]]
+                    if (note != null) {
+                        call.respondHtml {
+                            body {
+                                h1 {
+                                    +note.meta.id
+                                }
+                                unsafe {
+                                    +parseMd(note.content)
+                                }
+                            }
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, "Not found")
+                    }
+                }
+            }
             static("/static") {
                 resources()
             }
@@ -59,62 +90,50 @@ fun main() {
 
 suspend fun newNote(call: ApplicationCall) {
     val name = call.receiveText()
-    val newNoteMeta = NoteMeta(Random.nextInt(), name)
+    val newNoteMeta = NoteMeta(name)
     dummy.add(newNoteMeta)
     dummy1[newNoteMeta.id] = Note("Put *your* __text__ `here`", newNoteMeta)
     call.respond(HttpStatusCode.Accepted, newNoteMeta)
 }
 
 suspend fun getNote(call: ApplicationCall) {
-    try {
-        val id = call.parameters["id"]?.toInt()
-        val note = dummy1[id]
-        if (note != null) {
-            call.respond(note)
-        } else {
-            call.respond(HttpStatusCode.NotFound, "Unknown note!")
-        }
-    } catch (e: NumberFormatException) {
-        call.respond(HttpStatusCode.BadRequest, "Illegal id!")
+    val id = call.parameters["id"]
+    val note = dummy1[id]
+    if (note != null) {
+        call.respond(note)
+    } else {
+        call.respond(HttpStatusCode.NotFound, "Not found")
     }
 }
 
 suspend fun setNote(call: ApplicationCall) {
-    try {
-        val id = call.parameters["id"]?.toInt()
-        val note = dummy1[id]
-        if (note != null) {
-            note.content = call.receiveText()
-            call.respondText("Updated successfully!", status = HttpStatusCode.Accepted)
-        } else {
-            call.respond(HttpStatusCode.NotFound, "Unknown note!")
-        }
-    } catch (e: NumberFormatException) {
-        call.respond(HttpStatusCode.BadRequest, "Illegal id!")
+    val id = call.parameters["id"]
+    val note = dummy1[id]
+    if (note != null) {
+        note.content = call.receiveText()
+        call.respondText("Updated successfully!", status = HttpStatusCode.Accepted)
+    } else {
+        call.respond(HttpStatusCode.NotFound, "Unknown note!")
     }
 }
 
 suspend fun deleteNote(call: ApplicationCall) {
-    try {
-        val id = call.parameters["id"]?.toInt()
-        val note = dummy1[id]
-        if (note != null) {
-            dummy.remove(note.meta)
-            dummy1.remove(id)
-            call.respondText("Deleted successfully!", status = HttpStatusCode.Accepted)
-        } else {
-            call.respond(HttpStatusCode.NotFound, "Unknown note!")
-        }
-    } catch (e: NumberFormatException) {
-        call.respond(HttpStatusCode.BadRequest, "Illegal id!")
+    val id = call.parameters["id"]
+    val note = dummy1[id]
+    if (note != null) {
+        dummy.remove(note.meta)
+        dummy1.remove(id)
+        call.respondText("Deleted successfully!", status = HttpStatusCode.Accepted)
+    } else {
+        call.respond(HttpStatusCode.NotFound, "Unknown note!")
     }
 }
 
 val dummy = mutableListOf(
-    NoteMeta(1, "first note"),//, Clock.System.now()),
-    NoteMeta(2, "kek"),//, Clock.System.now()),
-    NoteMeta(9, "first note"),//, Clock.System.now()),
-    NoteMeta(10, "Hello w"),//, Clock.System.now()),
+    NoteMeta("first note"),
+    NoteMeta("kek"),
+    NoteMeta("firs note"),
+    NoteMeta("Hello w"),
 )
 
 val dummy1 = mutableMapOf(

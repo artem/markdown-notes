@@ -16,16 +16,16 @@ class MarkdownList : RComponent<MarkdownListProps, RState>() {
     override fun RBuilder.render() {
         for (note in props.list) {
             p {
-                key = note.id.toString()
+                key = note.id
                 attrs {
                     onClickFunction = {
                         props.onSelectNote(note)
                     }
                 }
                 if (note == props.selected) {
-                    b { +note.name }
+                    b { +note.id }
                 } else {
-                    +note.name
+                    +note.id
                 }
             }
         }

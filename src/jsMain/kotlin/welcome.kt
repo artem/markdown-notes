@@ -111,11 +111,3 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
         }
     }
 }
-
-private fun parseMd(src: String): String {
-    val sanitized = src.replace("<", "&lt;")
-    val flavour: MarkdownFlavourDescriptor = CommonMarkFlavourDescriptor()
-    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(sanitized)
-    val html = HtmlGenerator(sanitized, parsedTree, flavour).generateHtml()
-    return html.substring("<body>".length, html.length - "</body>".length)
-}

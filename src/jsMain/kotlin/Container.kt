@@ -12,7 +12,7 @@ import react.*
 import react.dom.button
 import react.dom.h3
 
-suspend fun fetchNote(id: Int): Note {
+suspend fun fetchNote(id: String): Note {
     val responsePromise = window.fetch("/api/notes/$id")
     val response = responsePromise.await()
     val jsonPromise = response.text()
@@ -122,7 +122,5 @@ class Container : RComponent<RProps, CompState>() {
             }
             +"Reload"
         }
-
-
     }
 }
