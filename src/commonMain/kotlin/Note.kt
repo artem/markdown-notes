@@ -1,5 +1,8 @@
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Note(var content: String, val meta: NoteMeta)
 
-data class NoteMeta(val id: Int, val name: String, val created: Instant)
+@Serializable
+data class NoteMeta(val id: Int, val name: String)
