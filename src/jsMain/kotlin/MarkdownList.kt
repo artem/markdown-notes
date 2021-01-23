@@ -1,10 +1,11 @@
+import kotlinx.html.classes
 import kotlinx.html.js.onClickFunction
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
-import react.dom.b
-import react.dom.p
+import react.dom.li
+import react.dom.ul
 
 external interface MarkdownListProps : RProps {
     var list: List<NoteMeta>
@@ -14,17 +15,20 @@ external interface MarkdownListProps : RProps {
 
 class MarkdownList : RComponent<MarkdownListProps, RState>() {
     override fun RBuilder.render() {
-        for (note in props.list) {
-            p {
-                key = note.id
-                attrs {
-                    onClickFunction = {
-                        props.onSelectNote(note)
+        ul("list-group flex-column") {
+            for (note in props.list) {
+                li("list-group-item") {
+                    key = note.id
+
+                    attrs {
+                        if (note == props.selected) {
+                            classes = setOf("list-group-item", "active")
+                        }
+                        onClickFunction = {
+                            props.onSelectNote(note)
+                        }
                     }
-                }
-                if (note == props.selected) {
-                    b { +note.id }
-                } else {
+
                     +note.id
                 }
             }

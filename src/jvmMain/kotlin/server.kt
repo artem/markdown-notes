@@ -11,15 +11,22 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.html.*
 
+const val CDN_LINK = "https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/"
+
 fun HTML.index() {
     head {
-        title("Hello from Ktor!")
+        title("Markdown notes")
+        link {
+            rel = "stylesheet"
+            href = CDN_LINK + "css/bootstrap.min.css"
+        }
     }
-    body {
-        div {
+    body("bg-light") {
+        div("container") {
             id = "root"
         }
         script(src = "/static/output.js") {}
+        script(src = CDN_LINK + "js/bootstrap.bundle.min.js") {}
     }
 }
 
@@ -53,12 +60,15 @@ fun main() {
                 get {
                     call.respondHtml {
                         body {
-                            for (note in dummy) {
-                                a {
-                                    href = "/notes/${note.id}"
-                                    +note.id
+                            ul {
+                                for (note in dummy) {
+                                    li {
+                                        a {
+                                            href = "/notes/${note.id}"
+                                            +note.id
+                                        }
+                                    }
                                 }
-                                br
                             }
                         }
                     }
@@ -67,12 +77,18 @@ fun main() {
                     val note = dummy1[call.parameters["id"]]
                     if (note != null) {
                         call.respondHtml {
-                            body {
-                                h1 {
-                                    +note.meta.id
+                            head {
+                                title("Markdown notes")
+                                link {
+                                    rel = "stylesheet"
+                                    href = CDN_LINK + "css/bootstrap.min.css"
                                 }
-                                unsafe {
-                                    +parseMd(note.content)
+                            }
+                            body("bg-light") {
+                                div("container bg-white") {
+                                    unsafe {
+                                        +parseMd(note.content)
+                                    }
                                 }
                             }
                         }
