@@ -30,8 +30,11 @@ fun HTML.index() {
     }
 }
 
+val dbi = DatabaseInstance("server.db")
+
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "127.0.0.1") {
+    //val dbi = DatabaseInstance("server.db")
+    embeddedServer(Netty, port = 80) {
         install(ContentNegotiation) {
             json()
         }
@@ -41,7 +44,7 @@ fun main() {
             }
             route("/api/notes/") {
                 get {
-                    call.respond(dummy)
+                    call.respond(dbi.getNotesList())
                 }
                 post {
                     newNote(call)
@@ -61,7 +64,7 @@ fun main() {
                     call.respondHtml {
                         body {
                             ul {
-                                for (note in dummy) {
+                                for (note in dbi.getNotesList()) {
                                     li {
                                         a {
                                             href = "/notes/${note.id}"
@@ -74,7 +77,7 @@ fun main() {
                     }
                 }
                 get("{id}") {
-                    val note = dummy1[call.parameters["id"]]
+                    val note = dbi.getNote(call.parameters["id"]!!)
                     if (note != null) {
                         call.respondHtml {
                             head {
@@ -107,14 +110,13 @@ fun main() {
 suspend fun newNote(call: ApplicationCall) {
     val name = call.receiveText()
     val newNoteMeta = NoteMeta(name)
-    dummy.add(newNoteMeta)
-    dummy1[newNoteMeta.id] = Note("Put *your* __text__ `here`", newNoteMeta)
+    dbi.insertNote("Put *your* __text__ `here`", newNoteMeta)
     call.respond(HttpStatusCode.Accepted, newNoteMeta)
 }
 
 suspend fun getNote(call: ApplicationCall) {
     val id = call.parameters["id"]
-    val note = dummy1[id]
+    val note = dbi.getNote(id!!)
     if (note != null) {
         call.respond(note)
     } else {
@@ -124,9 +126,9 @@ suspend fun getNote(call: ApplicationCall) {
 
 suspend fun setNote(call: ApplicationCall) {
     val id = call.parameters["id"]
-    val note = dummy1[id]
+    val note = dbi.getNote(id!!)
     if (note != null) {
-        note.content = call.receiveText()
+        dbi.updateNote(call.receiveText(), note)
         call.respondText("Updated successfully!", status = HttpStatusCode.Accepted)
     } else {
         call.respond(HttpStatusCode.NotFound, "Unknown note!")
@@ -135,26 +137,12 @@ suspend fun setNote(call: ApplicationCall) {
 
 suspend fun deleteNote(call: ApplicationCall) {
     val id = call.parameters["id"]
-    val note = dummy1[id]
+    val note = dbi.getNote(id!!)
     if (note != null) {
-        dummy.remove(note.meta)
-        dummy1.remove(id)
+        dbi.removeNote(note.meta)
         call.respondText("Deleted successfully!", status = HttpStatusCode.Accepted)
     } else {
         call.respond(HttpStatusCode.NotFound, "Unknown note!")
     }
 }
 
-val dummy = mutableListOf(
-    NoteMeta("first note"),
-    NoteMeta("kek"),
-    NoteMeta("firs note"),
-    NoteMeta("Hello w"),
-)
-
-val dummy1 = mutableMapOf(
-    dummy[0].id to Note("1", dummy[0]),
-    dummy[1].id to Note("`2`", dummy[1]),
-    dummy[2].id to Note("_3_", dummy[2]),
-    dummy[3].id to Note("~4~", dummy[3]),
-)
